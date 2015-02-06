@@ -2,7 +2,7 @@
 
 A simple [Riemann](http://riemann.io) client written in Erlang.
 
-[![Build Status](https://travis-ci.org/puzza007/katja.png)](https://travis-ci.org/nifoc/katja) [![Coverage Status](https://coveralls.io/repos/puzza007/katja/badge.png?branch=master)](https://coveralls.io/r/puzza007/katja?branch=master)
+[![Build Status](https://travis-ci.org/puzza007/katja.png)](https://travis-ci.org/puzza007/katja) [![Coverage Status](https://coveralls.io/repos/puzza007/katja/badge.png?branch=master)](https://coveralls.io/r/puzza007/katja?branch=master)
 
 ## Status
 
