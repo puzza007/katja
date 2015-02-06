@@ -22,8 +22,6 @@
 % Tests
 -export([
   connect/1,
-  connect_tcp/1,
-  connect_udp/1,
   send_invalid_tcp/1
 ]).
 
@@ -32,8 +30,6 @@
 all() ->
   [
     connect,
-    connect_tcp,
-    connect_udp,
     send_invalid_tcp
   ].
 
@@ -44,24 +40,11 @@ connect(_Config) ->
   ok = katja_connection:disconnect(State),
   Host = "10.99.99.99",
   Port = 9001,
-  {ok, {connection_state, undefined, Udp, Host, Port, detect}} =
-    katja_connection:connect("10.99.99.99", 9001),
-  true = is_port(Udp).
-
-connect_tcp(_Config) ->
-  {ok, State} = katja_connection:connect_tcp(),
-  ok = katja_connection:disconnect(State),
-  Host = "10.99.99.99",
-  Port = 9001,
-  {ok, {connection_state, undefined, undefined, Host, Port, tcp}} =
-    katja_connection:connect_tcp(Host, Port).
-
-connect_udp(_Config) ->
-  {ok, State} = katja_connection:connect_udp(),
-  ok = katja_connection:disconnect(State).
+  {ok, {connection_state, undefined, Host, Port}} =
+    katja_connection:connect("10.99.99.99", 9001).
 
 send_invalid_tcp(_Config) ->
-  {ok, State} = katja_connection:connect_tcp(),
-  {{error, closed}, State2} = katja_connection:send_message(tcp, <<"invalid">>, State),
-  {{error, closed}, State3} = katja_connection:send_message(tcp, <<"still invalid">>, State2),
+  {ok, State} = katja_connection:connect(),
+  {{error, closed}, State2} = katja_connection:send_message(<<"invalid">>, State),
+  {{error, closed}, State3} = katja_connection:send_message(<<"still invalid">>, State2),
   ok = katja_connection:disconnect(State3).

@@ -39,8 +39,7 @@ start_link() ->
 init([]) ->
   Pool = application:get_env(katja, pool, ?DEFAULT_POOL),
   Children = maybe_add_child(katja_writer, Pool, child_spec(katja_writer), []),
-  Children2 = maybe_add_child(katja_reader, Pool, child_spec(katja_reader), Children),
-  {ok, {{one_for_all, 10, 10}, Children2}}.
+  {ok, {{one_for_all, 10, 10}, Children}}.
 
 % Private
 
