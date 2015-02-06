@@ -96,28 +96,26 @@ send_message(Msg, #connection_state{host=Host, port=Port, socket=Socket}=S)
         {error, Reason} when Reason == econnrefused orelse
                              Reason == closed orelse
                              Reason == timeout  ->
+            gen_tcp:close(Socket),
             case connect(Host, Port) of
+                {ok, S2 = #connection_state{socket=undefined}} ->
+                    Error = {error, connection_error},
+                    {Error, S2};
                 {ok, #connection_state{socket=NewSocket}} ->
                     S2 = S#connection_state{socket=NewSocket},
-                    send_message(Msg, S2);
-                {error, _Reason}=E ->
-                    gen_tcp:close(Socket),
-                    S2 = S#connection_state{socket=undefined},
-                    {E, S2}
+                    send_message(Msg, S2)
             end;
         {error, _Reason}=E -> {E, S}
     end;
 send_message(Msg, #connection_state{host=Host, port=Port, socket=undefined}=S) ->
     case connect(Host, Port) of
         {ok, #connection_state{socket=undefined}} ->
-            {{error, connection_error}, S};
+            Error = {error, connection_error},
+            {Error, S};
         {ok, #connection_state{socket=NewSocket}}
           when is_port(NewSocket) ->
             S2 = S#connection_state{socket=NewSocket},
-            send_message(Msg, S2);
-        {error, _Reason}=E ->
-            S2 = S#connection_state{socket=undefined},
-            {E, S2}
+            send_message(Msg, S2)
     end.
 
 -spec receive_reply(gen_tcp:socket()) -> {ok, term()} | {error, term()}.
