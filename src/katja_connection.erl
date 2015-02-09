@@ -43,6 +43,7 @@
 -export([connect/2]).
 -export([disconnect/1]).
 -export([send_message/2]).
+-export([is_connected/1]).
 
 
 -spec connect() -> {ok, state()} | {error, term()}.
@@ -76,8 +77,14 @@ maybe_connect(#connection_state{host=Host, port=Port}=S) ->
                              Reason == closed orelse
                              Reason == timeout  ->
             S2 = S#connection_state{socket=undefined},
+            error_logger:error_msg("Error sending event to riemann: ~p", [Reason]),
             {ok, S2}
     end.
+
+is_connected(#connection_state{socket=undefined}) ->
+    false;
+is_connected(#connection_state{socket=Socket}) when is_port(Socket) ->
+    true.
 
 -spec
 send_message(binary(), state()) ->
@@ -97,6 +104,7 @@ send_message(Msg, #connection_state{host=Host, port=Port, socket=Socket}=S)
                              Reason == closed orelse
                              Reason == timeout  ->
             gen_tcp:close(Socket),
+            error_logger:error_msg("Error sending event to riemann: ~p", [Reason]),
             case connect(Host, Port) of
                 {ok, S2 = #connection_state{socket=undefined}} ->
                     Error = {error, connection_error},
@@ -107,16 +115,8 @@ send_message(Msg, #connection_state{host=Host, port=Port, socket=Socket}=S)
             end;
         {error, _Reason}=E -> {E, S}
     end;
-send_message(Msg, #connection_state{host=Host, port=Port, socket=undefined}=S) ->
-    case connect(Host, Port) of
-        {ok, #connection_state{socket=undefined}} ->
-            Error = {error, connection_error},
-            {Error, S};
-        {ok, #connection_state{socket=NewSocket}}
-          when is_port(NewSocket) ->
-            S2 = S#connection_state{socket=NewSocket},
-            send_message(Msg, S2)
-    end.
+send_message(_Msg, #connection_state{socket=undefined}=S) ->
+    {{error, connection_error}, S}.
 
 -spec receive_reply(gen_tcp:socket()) -> {ok, term()} | {error, term()}.
 receive_reply(Socket) ->

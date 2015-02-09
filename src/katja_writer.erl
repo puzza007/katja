@@ -88,6 +88,14 @@ handle_call(_Request, _From, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
+handle_info(reconnect, State) ->
+    case katja_connection:is_connected(State) of
+        true ->
+            {noreply, State};
+        false ->
+            {ok, NextState} = katja_connection:connect(),
+            {noreply, NextState}
+    end;
 handle_info(_Msg, State) ->
     {noreply, State}.
 
@@ -210,8 +218,13 @@ send_message(Msg, State) ->
     BinMsg = iolist_to_binary(Msg2),
     case katja_connection:send_message(BinMsg, State) of
         {{ok, _RetMsg}, State2} -> {ok, State2};
-        {{error, _Reason}, _State2}=E -> E
+        {{error, _Reason}, _State2}=E ->
+            schedule_reconnect(),
+            E
     end.
+
+schedule_reconnect() ->
+    erlang:send_after(30000, self(), reconnect).
 
 -ifdef(TEST).
 -define(TEST_DATA, [
