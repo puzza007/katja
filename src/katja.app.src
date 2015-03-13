@@ -1,17 +1,21 @@
-{application, katja, [
+%% -*- mode: erlang -*-
+{application, katja,
+ [
   {description, "Erlang client for the Riemann network monitoring system."},
-  {vsn, "0.7.1"},
   {modules, []},
-  {registered, [
+  {vsn, "0.7.2"},
+  {registered,
+   [
     katja_sup,
     katja_writer,
     katja_reader
-  ]},
-  {applications, [
+   ]},
+  {applications,
+   [
     kernel,
     stdlib,
-    protobuffs
-  ]},
-  {mod, {katja_app, []}},
-  {env, []}
+    protobuffs,
+    quintana
+   ]},
+  {mod, {katja_app, []}}
 ]}.

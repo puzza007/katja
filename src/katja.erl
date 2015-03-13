@@ -67,11 +67,17 @@
 
 -spec start() -> ok.
 start() ->
+    ok = application:start(bear),
+    ok = application:start(folsom),
+    ok = application:start(quintana),
     ok = application:start(protobuffs),
     ok = application:start(katja).
 
 -spec stop() -> ok.
 stop() ->
+    ok = application:stop(quintana),
+    ok = application:stop(folsom),
+    ok = application:stop(bear),
     ok = application:stop(katja),
     ok = application:stop(protobuffs).
 

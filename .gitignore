@@ -10,5 +10,5 @@ erl_crash.dump
 *.beam
 *.plt
 *.trace
-
+.eunit
 include/katja_pb.hrl

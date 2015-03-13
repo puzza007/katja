@@ -59,19 +59,31 @@ stop(Pid) ->
 
 -spec send_event(katja:process(), katja:event()) -> ok | {error, term()}.
 send_event(Pid, Data) ->
+    Timer = quintana:begin_timed(<<"katja.send_event.time">>),
+    ok = quintana:notify_spiral({<<"katja.send_event.num">>, 1}),
     Event = create_event(Data),
-    gen_server:call(Pid, {send_message, event, Event}).
+    Res = gen_server:call(Pid, {send_message, event, Event}),
+    ok = quintana:notify_timed(Timer),
+    Res.
 
 -spec send_state(katja:process(), katja:event()) -> ok | {error, term()}.
 send_state(Pid, Data) ->
+    Timer = quintana:begin_timed(<<"katja.send_state.time">>),
+    ok = quintana:notify_spiral({<<"katja.send_state.num">>, 1}),
     State = create_state(Data),
-    gen_server:call(Pid, {send_message, state, State}).
+    Res = gen_server:call(Pid, {send_message, state, State}),
+    ok = quintana:notify_timed(Timer),
+    Res.
 
 -spec send_entities(katja:process(), katja:entities()) -> ok | {error, term()}.
 send_entities(Pid, Data) ->
+    Timer = quintana:begin_timed(<<"katja.send_entities.time">>),
+    ok = quintana:notify_spiral({<<"katja.send_entities.num">>, 1}),
     {EventEntities, StateEntities} = create_events_and_states(Data),
     Entities = StateEntities ++ EventEntities,
-    gen_server:call(Pid, {send_message, entities, Entities}).
+    Res = gen_server:call(Pid, {send_message, entities, Entities}),
+    ok = quintana:notify_timed(Timer),
+    Res.
 
 init([]) ->
     {ok, _} = katja_connection:connect().
