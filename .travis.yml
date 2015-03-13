@@ -1,4 +1,5 @@
 language: erlang
+
 otp_release:
   - 17.3
   - 17.1
@@ -6,14 +7,13 @@ otp_release:
   - R16B03-1
   - R16B03
   - R16B02
-  - R16B01
+
 script:
-  - make dialyze
-  - make tests
+  - rebar get-deps compile
+  - rebar skip_deps=true eunit ct
 
 install:
   - URL='https://aphyr.com/riemann/riemann_0.2.8_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
+
 before_script:
   - sudo service riemann start
-after_success:
-  - make coverage-report
