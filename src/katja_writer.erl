@@ -45,13 +45,14 @@
 -export([terminate/2]).
 
 
--spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
     gen_server:start_link(?MODULE, [], []).
 
 -spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []);
+start_link(Args) ->
+    gen_server:start_link(?MODULE, [], Args).
 
 -spec stop(katja:process()) -> ok.
 stop(Pid) ->
@@ -86,7 +87,11 @@ send_entities(Pid, Data) ->
     Res.
 
 init([]) ->
-    {ok, _} = katja_connection:connect().
+    {ok, _} = katja_connection:connect();
+init(Args) ->
+    Host = proplists:get_value(Args, host),
+    Port = proplists:get_value(Args, port),
+    {ok, _} = katja_connection:connect(Host, Port).
 
 handle_call({send_message, _Type, Data}, _From, State) ->
     Msg = create_message(Data),
