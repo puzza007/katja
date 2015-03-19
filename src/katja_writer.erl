@@ -28,6 +28,7 @@
 -endif.
 
 -define(DEFAULT_DEFAULTS, []).
+-define(DEFAULT_SEND_EVENT_TIMEOUT, 30000).
 -define(COMMON_FIELDS, [time, state, service, host, description, tags, ttl]).
 
 -export([send_entities/2]).
@@ -59,10 +60,13 @@ stop(Pid) ->
 
 -spec send_event(katja:process(), katja:event()) -> ok | {error, term()}.
 send_event(Pid, Data) ->
+    send_event(Pid, Data, ?DEFAULT_SEND_EVENT_TIMEOUT).
+
+send_event(Pid, Data, Timeout) ->
     Timer = quintana:begin_timed(<<"katja.send_event.time">>),
     ok = quintana:notify_spiral({<<"katja.send_event.num">>, 1}),
     Event = create_event(Data),
-    Res = gen_server:call(Pid, {send_message, event, Event}),
+    Res = gen_server:call(Pid, {send_message, event, Event}, Timeout),
     ok = quintana:notify_timed(Timer),
     Res.
 
